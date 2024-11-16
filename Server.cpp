@@ -9,7 +9,7 @@ std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 void Server::onLoad()
 {
 	_globalCvarManager = cvarManager;
-	//LOG("Plugin loaded!");
+	LOG("Plugin loaded!");
 	// !! Enable debug logging by setting DEBUG_LOG = true in logging.h !!
 	//DEBUGLOG("Server debug mode enabled");
 
@@ -46,4 +46,9 @@ void Server::onLoad()
 	//});
 	// You could also use std::bind here
 	//gameWrapper->HookEvent("Function TAGame.Ball_TA.Explode", std::bind(&Server::YourPluginMethod, this);
+}
+
+void Server::onUnload()
+{
+
 }

@@ -32,3 +32,6 @@
 *.app
 
 .vs
+build
+plugins
+server.aps

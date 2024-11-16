@@ -13,12 +13,11 @@ class Server: public BakkesMod::Plugin::BakkesModPlugin
 	//,public SettingsWindowBase // Uncomment if you wanna render your own tab in the settings menu
 	//,public PluginWindowBase // Uncomment if you want to render your own plugin window
 {
-
 	//std::shared_ptr<bool> enabled;
 
 	//Boilerplate
 	void onLoad() override;
-	//void onUnload() override; // Uncomment and implement if you need a unload method
+	void onUnload() override; // Uncomment and implement if you need a unload method
 
 public:
 	//void RenderSettings() override; // Uncomment if you wanna render your own tab in the settings menu
