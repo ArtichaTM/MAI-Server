@@ -35,3 +35,5 @@
 build
 plugins
 server.aps
+capnp
+kj
