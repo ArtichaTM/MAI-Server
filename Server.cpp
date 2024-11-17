@@ -37,6 +37,8 @@ void MAIServer::onLoad()
 				input->Jump = latest_controls.getJump();
 			}
 			input->Jumped = latest_controls.getJump();
+			input->DodgeForward = latest_controls.getDodgeForward();
+			input->DodgeStrafe = latest_controls.getDodgeStrafe();
 		});
 
 	// !! Enable debug logging by setting DEBUG_LOG = true in logging.h !!
@@ -289,7 +291,7 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 	});
 
 	while (!data_collected.load()) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
+		continue;
 	}
 
 	return capnp::messageToFlatArray(message);

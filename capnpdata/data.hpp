@@ -526,6 +526,12 @@ public:
 
   inline bool getJump() const;
 
+  inline bool getHandbrake() const;
+
+  inline  ::int8_t getDodgeForward() const;
+
+  inline  ::int8_t getDodgeStrafe() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -574,6 +580,15 @@ public:
 
   inline bool getJump();
   inline void setJump(bool value);
+
+  inline bool getHandbrake();
+  inline void setHandbrake(bool value);
+
+  inline  ::int8_t getDodgeForward();
+  inline void setDodgeForward( ::int8_t value);
+
+  inline  ::int8_t getDodgeStrafe();
+  inline void setDodgeStrafe( ::int8_t value);
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -1045,6 +1060,48 @@ inline bool MAIControls::Builder::getJump() {
 inline void MAIControls::Builder::setJump(bool value) {
   _builder.setDataField<bool>(
       ::capnp::bounded<161>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool MAIControls::Reader::getHandbrake() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<162>() * ::capnp::ELEMENTS);
+}
+
+inline bool MAIControls::Builder::getHandbrake() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<162>() * ::capnp::ELEMENTS);
+}
+inline void MAIControls::Builder::setHandbrake(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<162>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int8_t MAIControls::Reader::getDodgeForward() const {
+  return _reader.getDataField< ::int8_t>(
+      ::capnp::bounded<21>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int8_t MAIControls::Builder::getDodgeForward() {
+  return _builder.getDataField< ::int8_t>(
+      ::capnp::bounded<21>() * ::capnp::ELEMENTS);
+}
+inline void MAIControls::Builder::setDodgeForward( ::int8_t value) {
+  _builder.setDataField< ::int8_t>(
+      ::capnp::bounded<21>() * ::capnp::ELEMENTS, value);
+}
+
+inline  ::int8_t MAIControls::Reader::getDodgeStrafe() const {
+  return _reader.getDataField< ::int8_t>(
+      ::capnp::bounded<22>() * ::capnp::ELEMENTS);
+}
+
+inline  ::int8_t MAIControls::Builder::getDodgeStrafe() {
+  return _builder.getDataField< ::int8_t>(
+      ::capnp::bounded<22>() * ::capnp::ELEMENTS);
+}
+inline void MAIControls::Builder::setDodgeStrafe( ::int8_t value) {
+  _builder.setDataField< ::int8_t>(
+      ::capnp::bounded<22>() * ::capnp::ELEMENTS, value);
 }
 
 
