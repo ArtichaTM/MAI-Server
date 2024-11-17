@@ -16,7 +16,7 @@
 constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH) "." stringify(VERSION_BUILD);
 
 constexpr auto DEFAULT_PORT = 11545;
-constexpr auto MAICONTROLS_SIZE = 40;
+constexpr auto MAICONTROLS_SIZE = 80;
 constexpr auto RECEIVE_TIMEOUT_SECONDS = std::chrono::seconds(3);
 
 class MAIServer : public BakkesMod::Plugin::BakkesModPlugin

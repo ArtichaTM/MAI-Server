@@ -23,22 +23,25 @@ void MAIServer::onLoad()
 		"Function TAGame.Car_TA.SetVehicleInput",
 		[this](CarWrapper caller, void* params, std::string eventName) {
 			if (client_socket == INVALID_SOCKET) return;
+			if (latest_controls.getSkip()) return;
 			ControllerInput* input = static_cast<ControllerInput*>(params);
 			input->Throttle = latest_controls.getThrottle();
 			input->Steer = latest_controls.getSteer();
 			input->Pitch = latest_controls.getPitch();
 			input->Yaw = latest_controls.getYaw();
 			input->Roll = latest_controls.getRoll();
+			input->DodgeForward = latest_controls.getDodgeForward();
+			input->DodgeStrafe = latest_controls.getDodgeStrafe();
+
 			if (!input->ActivateBoost) {
 				input->ActivateBoost = latest_controls.getBoost();
 			}
 			input->HoldingBoost = latest_controls.getBoost();
+
 			if (!input->Jump) {
 				input->Jump = latest_controls.getJump();
 			}
 			input->Jumped = latest_controls.getJump();
-			input->DodgeForward = latest_controls.getDodgeForward();
-			input->DodgeStrafe = latest_controls.getDodgeStrafe();
 		});
 
 	// !! Enable debug logging by setting DEBUG_LOG = true in logging.h !!
@@ -198,8 +201,8 @@ void MAIServer::serveThread()
 			if (bytesReceived == -1) {
 				closesocket(client_socket);
 				break;
-			} else if (bytesReceived > 40) {
-				LOG("Awaited 40 bytes, but received {}", bytesReceived);
+			} else if (bytesReceived > 48) {
+				LOG("Awaited 48 bytes, but received {}", bytesReceived);
 			} else if (bytesReceived == 0) {
 				break;
 			}

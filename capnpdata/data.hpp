@@ -96,7 +96,7 @@ struct MAIControls {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(d06216327693bb76, 3, 0)
+    CAPNP_DECLARE_STRUCT_HEADER(d06216327693bb76, 4, 0)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
@@ -528,9 +528,11 @@ public:
 
   inline bool getHandbrake() const;
 
-  inline  ::int8_t getDodgeForward() const;
+  inline float getDodgeForward() const;
 
-  inline  ::int8_t getDodgeStrafe() const;
+  inline float getDodgeStrafe() const;
+
+  inline bool getSkip() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -584,11 +586,14 @@ public:
   inline bool getHandbrake();
   inline void setHandbrake(bool value);
 
-  inline  ::int8_t getDodgeForward();
-  inline void setDodgeForward( ::int8_t value);
+  inline float getDodgeForward();
+  inline void setDodgeForward(float value);
 
-  inline  ::int8_t getDodgeStrafe();
-  inline void setDodgeStrafe( ::int8_t value);
+  inline float getDodgeStrafe();
+  inline void setDodgeStrafe(float value);
+
+  inline bool getSkip();
+  inline void setSkip(bool value);
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -1076,32 +1081,46 @@ inline void MAIControls::Builder::setHandbrake(bool value) {
       ::capnp::bounded<162>() * ::capnp::ELEMENTS, value);
 }
 
-inline  ::int8_t MAIControls::Reader::getDodgeForward() const {
-  return _reader.getDataField< ::int8_t>(
-      ::capnp::bounded<21>() * ::capnp::ELEMENTS);
+inline float MAIControls::Reader::getDodgeForward() const {
+  return _reader.getDataField<float>(
+      ::capnp::bounded<6>() * ::capnp::ELEMENTS);
 }
 
-inline  ::int8_t MAIControls::Builder::getDodgeForward() {
-  return _builder.getDataField< ::int8_t>(
-      ::capnp::bounded<21>() * ::capnp::ELEMENTS);
+inline float MAIControls::Builder::getDodgeForward() {
+  return _builder.getDataField<float>(
+      ::capnp::bounded<6>() * ::capnp::ELEMENTS);
 }
-inline void MAIControls::Builder::setDodgeForward( ::int8_t value) {
-  _builder.setDataField< ::int8_t>(
-      ::capnp::bounded<21>() * ::capnp::ELEMENTS, value);
-}
-
-inline  ::int8_t MAIControls::Reader::getDodgeStrafe() const {
-  return _reader.getDataField< ::int8_t>(
-      ::capnp::bounded<22>() * ::capnp::ELEMENTS);
+inline void MAIControls::Builder::setDodgeForward(float value) {
+  _builder.setDataField<float>(
+      ::capnp::bounded<6>() * ::capnp::ELEMENTS, value);
 }
 
-inline  ::int8_t MAIControls::Builder::getDodgeStrafe() {
-  return _builder.getDataField< ::int8_t>(
-      ::capnp::bounded<22>() * ::capnp::ELEMENTS);
+inline float MAIControls::Reader::getDodgeStrafe() const {
+  return _reader.getDataField<float>(
+      ::capnp::bounded<7>() * ::capnp::ELEMENTS);
 }
-inline void MAIControls::Builder::setDodgeStrafe( ::int8_t value) {
-  _builder.setDataField< ::int8_t>(
-      ::capnp::bounded<22>() * ::capnp::ELEMENTS, value);
+
+inline float MAIControls::Builder::getDodgeStrafe() {
+  return _builder.getDataField<float>(
+      ::capnp::bounded<7>() * ::capnp::ELEMENTS);
+}
+inline void MAIControls::Builder::setDodgeStrafe(float value) {
+  _builder.setDataField<float>(
+      ::capnp::bounded<7>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool MAIControls::Reader::getSkip() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<163>() * ::capnp::ELEMENTS);
+}
+
+inline bool MAIControls::Builder::getSkip() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<163>() * ::capnp::ELEMENTS);
+}
+inline void MAIControls::Builder::setSkip(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<163>() * ::capnp::ELEMENTS, value);
 }
 
 
