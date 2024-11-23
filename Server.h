@@ -18,6 +18,8 @@ constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_M
 constexpr auto DEFAULT_PORT = 11545;
 constexpr auto MAICONTROLS_SIZE = 80;
 constexpr auto RECEIVE_TIMEOUT_SECONDS = std::chrono::seconds(3);
+constexpr float RENDER_TEXT_OFFSET = 30;
+const Vector ARENA_SIZE = Vector(4100, 6000, 2050);
 
 class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 	//,public SettingsWindowBase // Uncomment if you wanna render your own tab in the settings menu
@@ -30,6 +32,7 @@ class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 	SOCKET server_socket = INVALID_SOCKET;
 	SOCKET client_socket = INVALID_SOCKET;
 	MAIControls::Reader latest_controls;
+	Vector ball_default_position;
 
 	int initServer();
 	void serveThread();
@@ -37,6 +40,9 @@ class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 	//Boilerplate
 	void onLoad() override;
 	void onUnload() override; // Uncomment and implement if you need a unload method
+	void Render(CanvasWrapper canvas);
+	void OnBallSpawned(void* params);
+	void RoundExit(void* params);
 
 	void fill(Vector, MAIVector::Builder);
 	void fill(Rotator, MAIRotator::Builder);

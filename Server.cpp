@@ -43,6 +43,21 @@ void MAIServer::onLoad()
 			}
 			input->Jumped = latest_controls.getJump();
 		});
+	gameWrapper->RegisterDrawable([this](CanvasWrapper canvas) {
+		Render(canvas);
+	});
+	gameWrapper->HookEventWithCallerPost<ServerWrapper>(
+		"Function TAGame.GameEvent_Soccar_TA.OnBallSpawned",
+		[this](ServerWrapper caller, void* params, std::string eventname) {
+			OnBallSpawned(params);
+		}
+	);
+	gameWrapper->HookEventWithCallerPost<ServerWrapper>(
+		"Function TAGame.GameEvent_Soccar_TA.Destroyed",
+		[this](ServerWrapper caller, void* params, std::string eventname) {
+			RoundExit(params);
+		}
+	);
 
 	// !! Enable debug logging by setting DEBUG_LOG = true in logging.h !!
 	//DEBUGLOG("Server debug mode enabled");
@@ -72,7 +87,6 @@ void MAIServer::onLoad()
 	//cvarManager->registerCvar("CVAR", "DEFAULTVALUE", "DESCRIPTION", true, true, MINVAL, true, MAXVAL);//.bindTo(CVARVARIABLE);
 	//gameWrapper->HookEvent("FUNCTIONNAME", std::bind(&TEMPLATE::FUNCTION, this));
 	//gameWrapper->HookEventWithCallerPost<ActorWrapper>("FUNCTIONNAME", std::bind(&Server::FUNCTION, this, _1, _2, _3));
-	//gameWrapper->RegisterDrawable(bind(&TEMPLATE::Render, this, std::placeholders::_1));
 
 	//gameWrapper->HookEvent("Function TAGame.Ball_TA.Explode", [this](std::string eventName) {
 	//	LOG("Your hook got called and the ball went POOF");
@@ -220,9 +234,9 @@ void MAIServer::serveThread()
 
 void MAIServer::fill(Vector bm_vector, MAIVector::Builder builder)
 {
-	builder.setX(bm_vector.X);
-	builder.setY(bm_vector.Y);
-	builder.setZ(bm_vector.Z);
+	builder.setX((bm_vector.X - ball_default_position.X)/ARENA_SIZE.X);
+	builder.setY((bm_vector.Y - ball_default_position.Y)/ARENA_SIZE.Y);
+	builder.setZ((bm_vector.Z - ball_default_position.Z)/ARENA_SIZE.Z);
 }
 
 void MAIServer::fill(Rotator rotator, MAIRotator::Builder builder)
@@ -300,4 +314,60 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 	return capnp::messageToFlatArray(message);
 }
 
-void MAIServer::applyControls(MAIControls::Reader reader) { latest_controls = reader; }
+void MAIServer::applyControls(MAIControls::Reader reader) {
+	latest_controls = reader;
+	if (latest_controls.getReset() && gameWrapper != nullptr) {
+		LOG("Applying reset");
+		gameWrapper->Execute([](GameWrapper* gw) {
+			LOG("Executing");
+			ServerWrapper sw = gw->GetCurrentGameState();
+			if (!sw) return;
+			sw.PlayerResetTraining();
+		});
+	}
+}
+
+void MAIServer::Render(CanvasWrapper canvas) {
+	// defines colors in RGBA 0-255
+	LinearColor colors;
+	colors.R = 255;
+	colors.G = 255;
+	colors.B = 255;
+	colors.A = 120;
+	canvas.SetColor(colors);
+
+	// sets position to top left
+	// x moves to the right
+	// y moves down
+	// bottom right would be 1920, 1080 for 1080p monitors
+	canvas.SetPosition(Vector2F{ 100.0f, 180.0f });
+	float y_offset = 0;
+
+	// says hi
+	// draws from the last set position
+	// the two floats are text x and y scale
+	// the false turns off the drop shadow
+	char buf[100];
+	canvas.SetPosition(Vector2F{ 100.0f, 180.0f + y_offset });
+	snprintf(
+		buf,
+		sizeof(buf),
+		"Ball: (% 06f, % 06f, % 06f)",
+		ball_default_position.X,
+		ball_default_position.Y,
+		ball_default_position.Z
+	);
+	canvas.DrawString(buf, 2.0f, 2.0f);
+	y_offset += RENDER_TEXT_OFFSET;
+}
+
+void MAIServer::RoundExit(void* params)
+{
+	ball_default_position = Vector();
+}
+
+void MAIServer::OnBallSpawned(void* params)
+{
+	ball_default_position = gameWrapper->GetCurrentGameState().GetBall().GetLocation();
+	ball_default_position.Z -= 40;
+}

@@ -534,6 +534,8 @@ public:
 
   inline bool getSkip() const;
 
+  inline bool getReset() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -594,6 +596,9 @@ public:
 
   inline bool getSkip();
   inline void setSkip(bool value);
+
+  inline bool getReset();
+  inline void setReset(bool value);
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -1121,6 +1126,20 @@ inline bool MAIControls::Builder::getSkip() {
 inline void MAIControls::Builder::setSkip(bool value) {
   _builder.setDataField<bool>(
       ::capnp::bounded<163>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool MAIControls::Reader::getReset() const {
+  return _reader.getDataField<bool>(
+      ::capnp::bounded<164>() * ::capnp::ELEMENTS);
+}
+
+inline bool MAIControls::Builder::getReset() {
+  return _builder.getDataField<bool>(
+      ::capnp::bounded<164>() * ::capnp::ELEMENTS);
+}
+inline void MAIControls::Builder::setReset(bool value) {
+  _builder.setDataField<bool>(
+      ::capnp::bounded<164>() * ::capnp::ELEMENTS, value);
 }
 
 
