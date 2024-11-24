@@ -15,49 +15,16 @@ std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 void MAIServer::onLoad()
 {
 	_globalCvarManager = cvarManager;
+	allies .reserve(4);
+	enemies.reserve(4);
 
 	initServer();
 	server_thread = new std::thread([this] { serveThread(); });
+	performHooks();
 
-	gameWrapper->HookEventWithCaller<CarWrapper>(
-		"Function TAGame.Car_TA.SetVehicleInput",
-		[this](CarWrapper caller, void* params, std::string eventName) {
-			if (client_socket == INVALID_SOCKET) return;
-			if (latest_controls.getSkip()) return;
-			ControllerInput* input = static_cast<ControllerInput*>(params);
-			input->Throttle = latest_controls.getThrottle();
-			input->Steer = latest_controls.getSteer();
-			input->Pitch = latest_controls.getPitch();
-			input->Yaw = latest_controls.getYaw();
-			input->Roll = latest_controls.getRoll();
-			input->DodgeForward = latest_controls.getDodgeForward();
-			input->DodgeStrafe = latest_controls.getDodgeStrafe();
-
-			if (!input->ActivateBoost) {
-				input->ActivateBoost = latest_controls.getBoost();
-			}
-			input->HoldingBoost = latest_controls.getBoost();
-
-			if (!input->Jump) {
-				input->Jump = latest_controls.getJump();
-			}
-			input->Jumped = latest_controls.getJump();
-		});
 	gameWrapper->RegisterDrawable([this](CanvasWrapper canvas) {
 		Render(canvas);
 	});
-	gameWrapper->HookEventWithCallerPost<ServerWrapper>(
-		"Function TAGame.GameEvent_Soccar_TA.OnBallSpawned",
-		[this](ServerWrapper caller, void* params, std::string eventname) {
-			OnBallSpawned(params);
-		}
-	);
-	gameWrapper->HookEventWithCallerPost<ServerWrapper>(
-		"Function TAGame.GameEvent_Soccar_TA.Destroyed",
-		[this](ServerWrapper caller, void* params, std::string eventname) {
-			RoundExit(params);
-		}
-	);
 }
 
 void MAIServer::onUnload()
@@ -127,6 +94,84 @@ int MAIServer::initServer()
 	return 0;
 }
 
+void MAIServer::performHooks()
+{
+	gameWrapper->HookEventWithCaller<CarWrapper>(
+		"Function TAGame.Car_TA.SetVehicleInput",
+		[this](CarWrapper caller, void* params, std::string eventName) {
+			if (client_socket == INVALID_SOCKET) return;
+			if (latest_controls.getSkip()) return;
+			if (caller.memory_address != gameWrapper->GetLocalCar().memory_address) return;
+			ControllerInput* input = static_cast<ControllerInput*>(params);
+			input->Throttle = latest_controls.getThrottle();
+			input->Steer = latest_controls.getSteer();
+			input->Pitch = latest_controls.getPitch();
+			input->Yaw = latest_controls.getYaw();
+			input->Roll = latest_controls.getRoll();
+			input->DodgeForward = latest_controls.getDodgeForward();
+			input->DodgeStrafe = latest_controls.getDodgeStrafe();
+
+			if (!input->ActivateBoost) {
+				input->ActivateBoost = latest_controls.getBoost();
+			}
+			input->HoldingBoost = latest_controls.getBoost();
+
+			if (!input->Jump) {
+				input->Jump = latest_controls.getJump();
+			}
+			input->Jumped = latest_controls.getJump();
+		});
+	gameWrapper->HookEventWithCallerPost<ServerWrapper>(
+		"Function TAGame.GameEvent_Soccar_TA.Destroyed",
+		[this](ServerWrapper caller, void* params, std::string eventname) {
+			ball_default_position = Vector();
+			//std::lock_guard<std::mutex> guard(messages_mutex);
+			//this->messages.push(MAIGameState::MessageType::GAME_EXIT);
+		}
+	);
+	gameWrapper->HookEventWithCallerPost<BallWrapper>(
+		"Function TAGame.Ball_TA.Explode",
+		[this](BallWrapper caller, void* params, std::string eventname) {
+			//std::lock_guard<std::mutex> guard(messages_mutex);
+			//this->messages.push(MAIGameState::MessageType::BALL_EXPLODE);
+		}
+	);
+	gameWrapper->HookEventPost(
+		"Function TAGame.StatusObserver_Products_TA.OnTeamChanged",
+		[this](std::string eventname) {
+			gameWrapper->SetTimeout([this](GameWrapper* gw) {
+				this->RefreshTeamMembers();
+			}, 0.5f);
+		}
+	);
+	gameWrapper->HookEventPost(
+		"Function GameEvent_Soccar_TA.Countdown.BeginState",
+		[this](std::string eventname) {
+			gameWrapper->SetTimeout([this](GameWrapper* gw) {
+				this->RefreshTeamMembers();
+				this->ball_default_position = gameWrapper->GetCurrentGameState().GetBall().GetLocation();
+				this->ball_default_position.Z -= 40;
+			}, 1.f);
+			//std::lock_guard<std::mutex> guard(messages_mutex);
+			//this->messages.push(MAIGameState::MessageType::KICKOFF_TIMER_STARTED);
+		}
+	);
+	gameWrapper->HookEventPost(
+		"Function GameEvent_Soccar_TA.Active.StartRound",
+		[this](std::string eventname) {
+			//std::lock_guard<std::mutex> guard(messages_mutex);
+			//this->messages.push(MAIGameState::MessageType::KICKOFF_TIMER_ENDED);
+		}
+	);
+	gameWrapper->HookEventPost(
+		"Function GameEvent_Soccar_TA.ReplayPlayback.BeginState",
+		[this](std::string eventname) {
+			//std::lock_guard<std::mutex> guard(messages_mutex);
+			//this->messages.push(MAIGameState::MessageType::REPLAY_STARTED);
+		}
+	);
+}
+
 void MAIServer::serveThread()
 {
 	stop_server.store(false);
@@ -149,14 +194,13 @@ void MAIServer::serveThread()
 		}
 		while (!stop_server.load()) {
 			if (!(
-				gameWrapper->IsInOnlineGame()
-				||
 				gameWrapper->IsInCustomTraining()
 				||
 				gameWrapper->IsInFreeplay()
+				||
+				gameWrapper->IsInGame()
 			)) {
 				std::this_thread::sleep_for(std::chrono::seconds(1));
-				continue;
 			}
 			auto state = collectGameState();
 			send(client_socket, (const char*)state.begin(), state.size() * sizeof(capnp::word), 0);
@@ -172,7 +216,6 @@ void MAIServer::serveThread()
 			) {
 				bytesReceived = recv(client_socket, buffer, sizeof(buffer), 0);
 				if (bytesReceived == -1) {
-					//std::this_thread::sleep_for(std::chrono::milliseconds(100));
 					continue;
 				}
 				break;
@@ -239,6 +282,13 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 	game_state.setDead(true); // TODO
 	data_collected.store(false);
 	gameWrapper->Execute([this, &game_state](GameWrapper* gw) {
+		//messages_mutex.lock();
+		if (!this->messages.empty()) {
+			game_state.setMessage(this->messages.front());
+			this->messages.pop();
+		}
+		//messages_mutex.unlock();
+
 		// RL car
 		CarWrapper car = gw->GetLocalCar();
 		if (!car) {
@@ -253,22 +303,43 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 		// RL server
 		ServerWrapper server = gw->GetCurrentGameState();
 		if (!server) {
+			LOG("!server");
 		} else if (server.IsNull()) {
+			LOG("server.IsNull()");
 		} else {
 			// RL ball
 			BallWrapper ball = server.GetBall();
 			if (!ball) {
-				return;
-			}
-			if (ball.IsNull()) {
-				return;
+			} else if (ball.IsNull()) {
 			}
 			else {
 				fill(ball, game_state.initBall());
 			}
 		}
 
-		// ArrayWrapper<CarWrapper> cars(server.GetCars());
+		// Other cars
+		bool allies_exists = !this->allies.empty();
+		bool enemies_exists = !this->enemies.empty();
+		if (allies_exists or enemies_exists) {
+			MAIGameState::OtherCars::Builder other_cars = game_state.initOtherCars();
+			if (allies_exists) {
+				auto mai_allies = other_cars.initAllies(this->allies.size());
+				for (int i = 0; i < this->allies.size(); i++) {
+					CarWrapper car = this->allies[i];
+					if (car.IsNull()) continue;
+					fill(car, mai_allies[i]);
+				}
+			}
+			if (enemies_exists) {
+				auto mai_enemies = other_cars.initEnemies(this->enemies.size());
+				for (int i = 0; i < this->enemies.size(); i++) {
+					CarWrapper car = this->enemies[i];
+					if (car.IsNull()) continue;
+					fill(car, mai_enemies[i]);
+				}
+			}
+		}
+
 		data_collected.store(true);
 	});
 
@@ -282,9 +353,7 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 void MAIServer::applyControls(MAIControls::Reader reader) {
 	latest_controls = reader;
 	if (latest_controls.getReset() && gameWrapper != nullptr) {
-		LOG("Applying reset");
 		gameWrapper->Execute([](GameWrapper* gw) {
-			LOG("Executing");
 			ServerWrapper sw = gw->GetCurrentGameState();
 			if (!sw) return;
 			sw.PlayerResetTraining();
@@ -301,17 +370,9 @@ void MAIServer::Render(CanvasWrapper canvas) {
 	colors.A = 120;
 	canvas.SetColor(colors);
 
-	// sets position to top left
-	// x moves to the right
-	// y moves down
-	// bottom right would be 1920, 1080 for 1080p monitors
 	canvas.SetPosition(Vector2F{ 100.0f, 180.0f });
 	float y_offset = 0;
 
-	// says hi
-	// draws from the last set position
-	// the two floats are text x and y scale
-	// the false turns off the drop shadow
 	char buf[100];
 	canvas.SetPosition(Vector2F{ 100.0f, 180.0f + y_offset });
 	snprintf(
@@ -326,13 +387,21 @@ void MAIServer::Render(CanvasWrapper canvas) {
 	y_offset += RENDER_TEXT_OFFSET;
 }
 
-void MAIServer::RoundExit(void* params)
+void MAIServer::RefreshTeamMembers()
 {
-	ball_default_position = Vector();
-}
-
-void MAIServer::OnBallSpawned(void* params)
-{
-	ball_default_position = gameWrapper->GetCurrentGameState().GetBall().GetLocation();
-	ball_default_position.Z -= 40;
+	allies.clear();
+	enemies.clear();
+	if (!gameWrapper) return;
+	ServerWrapper server = gameWrapper->GetCurrentGameState();
+	if (!server) return;
+	CarWrapper local_car = gameWrapper->GetLocalCar();
+	if (!local_car) return;
+	ArrayWrapper<CarWrapper> cars = server.GetCars();
+	for (CarWrapper car : cars) {
+		if (car.GetTeamNum2() == local_car.GetTeamNum2()) {
+			allies.push_back(car);
+		} else {
+			enemies.push_back(car);
+		}
+	}
 }

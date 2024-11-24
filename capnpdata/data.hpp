@@ -22,6 +22,17 @@ CAPNP_DECLARE_SCHEMA(ab41f4dcadade2f4);
 CAPNP_DECLARE_SCHEMA(fc29d01dbec2b0a9);
 CAPNP_DECLARE_SCHEMA(b79e099d1bf4aa84);
 CAPNP_DECLARE_SCHEMA(8c3d50b71a5da0df);
+CAPNP_DECLARE_SCHEMA(a843988aaddc5a08);
+enum class MessageType_a843988aaddc5a08: uint16_t {
+  NONE,
+  BALL_EXPLODE,
+  GAME_EXIT,
+  KICKOFF_TIMER_STARTED,
+  KICKOFF_TIMER_ENDED,
+  REPLAY_STARTED,
+};
+CAPNP_DECLARE_ENUM(MessageType, a843988aaddc5a08);
+CAPNP_DECLARE_SCHEMA(ad6985620d4daba1);
 CAPNP_DECLARE_SCHEMA(d06216327693bb76);
 
 }  // namespace schemas
@@ -79,9 +90,27 @@ struct MAIGameState {
   class Reader;
   class Builder;
   class Pipeline;
+  typedef ::capnp::schemas::MessageType_a843988aaddc5a08 MessageType;
+
+  struct OtherCars;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(8c3d50b71a5da0df, 1, 2)
+    CAPNP_DECLARE_STRUCT_HEADER(8c3d50b71a5da0df, 1, 4)
+    #if !CAPNP_LITE
+    static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
+    #endif  // !CAPNP_LITE
+  };
+};
+
+struct MAIGameState::OtherCars {
+  OtherCars() = delete;
+
+  class Reader;
+  class Builder;
+  class Pipeline;
+
+  struct _capnpPrivate {
+    CAPNP_DECLARE_STRUCT_HEADER(ad6985620d4daba1, 1, 4)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
@@ -419,6 +448,10 @@ public:
 
   inline bool getDead() const;
 
+  inline typename OtherCars::Reader getOtherCars() const;
+
+  inline  ::MAIGameState::MessageType getMessage() const;
+
 private:
   ::capnp::_::StructReader _reader;
   template <typename, ::capnp::Kind>
@@ -467,6 +500,12 @@ public:
   inline bool getDead();
   inline void setDead(bool value);
 
+  inline typename OtherCars::Builder getOtherCars();
+  inline typename OtherCars::Builder initOtherCars();
+
+  inline  ::MAIGameState::MessageType getMessage();
+  inline void setMessage( ::MAIGameState::MessageType value);
+
 private:
   ::capnp::_::StructBuilder _builder;
   template <typename, ::capnp::Kind>
@@ -487,6 +526,98 @@ public:
 
   inline  ::MAIRLObjectState::Pipeline getCar();
   inline  ::MAIRLObjectState::Pipeline getBall();
+  inline typename OtherCars::Pipeline getOtherCars();
+private:
+  ::capnp::AnyPointer::Pipeline _typeless;
+  friend class ::capnp::PipelineHook;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+};
+#endif  // !CAPNP_LITE
+
+class MAIGameState::OtherCars::Reader {
+public:
+  typedef OtherCars Reads;
+
+  Reader() = default;
+  inline explicit Reader(::capnp::_::StructReader base): _reader(base) {}
+
+  inline ::capnp::MessageSize totalSize() const {
+    return _reader.totalSize().asPublic();
+  }
+
+#if !CAPNP_LITE
+  inline ::kj::StringTree toString() const {
+    return ::capnp::_::structString(_reader, *_capnpPrivate::brand());
+  }
+#endif  // !CAPNP_LITE
+
+  inline bool hasAllies() const;
+  inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Reader getAllies() const;
+
+  inline bool hasEnemies() const;
+  inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Reader getEnemies() const;
+
+private:
+  ::capnp::_::StructReader _reader;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::_::PointerHelpers;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::List;
+  friend class ::capnp::MessageBuilder;
+  friend class ::capnp::Orphanage;
+};
+
+class MAIGameState::OtherCars::Builder {
+public:
+  typedef OtherCars Builds;
+
+  Builder() = delete;  // Deleted to discourage incorrect usage.
+                       // You can explicitly initialize to nullptr instead.
+  inline Builder(decltype(nullptr)) {}
+  inline explicit Builder(::capnp::_::StructBuilder base): _builder(base) {}
+  inline operator Reader() const { return Reader(_builder.asReader()); }
+  inline Reader asReader() const { return *this; }
+
+  inline ::capnp::MessageSize totalSize() const { return asReader().totalSize(); }
+#if !CAPNP_LITE
+  inline ::kj::StringTree toString() const { return asReader().toString(); }
+#endif  // !CAPNP_LITE
+
+  inline bool hasAllies();
+  inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Builder getAllies();
+  inline void setAllies( ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Reader value);
+  inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Builder initAllies(unsigned int size);
+  inline void adoptAllies(::capnp::Orphan< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>> disownAllies();
+
+  inline bool hasEnemies();
+  inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Builder getEnemies();
+  inline void setEnemies( ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Reader value);
+  inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Builder initEnemies(unsigned int size);
+  inline void adoptEnemies(::capnp::Orphan< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>&& value);
+  inline ::capnp::Orphan< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>> disownEnemies();
+
+private:
+  ::capnp::_::StructBuilder _builder;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::ToDynamic_;
+  friend class ::capnp::Orphanage;
+  template <typename, ::capnp::Kind>
+  friend struct ::capnp::_::PointerHelpers;
+};
+
+#if !CAPNP_LITE
+class MAIGameState::OtherCars::Pipeline {
+public:
+  typedef OtherCars Pipelines;
+
+  inline Pipeline(decltype(nullptr)): _typeless(nullptr) {}
+  inline explicit Pipeline(::capnp::AnyPointer::Pipeline&& typeless)
+      : _typeless(kj::mv(typeless)) {}
+
 private:
   ::capnp::AnyPointer::Pipeline _typeless;
   friend class ::capnp::PipelineHook;
@@ -972,6 +1103,104 @@ inline bool MAIGameState::Builder::getDead() {
 inline void MAIGameState::Builder::setDead(bool value) {
   _builder.setDataField<bool>(
       ::capnp::bounded<32>() * ::capnp::ELEMENTS, value);
+}
+
+inline typename MAIGameState::OtherCars::Reader MAIGameState::Reader::getOtherCars() const {
+  return typename MAIGameState::OtherCars::Reader(_reader);
+}
+inline typename MAIGameState::OtherCars::Builder MAIGameState::Builder::getOtherCars() {
+  return typename MAIGameState::OtherCars::Builder(_builder);
+}
+#if !CAPNP_LITE
+inline typename MAIGameState::OtherCars::Pipeline MAIGameState::Pipeline::getOtherCars() {
+  return typename MAIGameState::OtherCars::Pipeline(_typeless.noop());
+}
+#endif  // !CAPNP_LITE
+inline typename MAIGameState::OtherCars::Builder MAIGameState::Builder::initOtherCars() {
+  _builder.getPointerField(::capnp::bounded<2>() * ::capnp::POINTERS).clear();
+  _builder.getPointerField(::capnp::bounded<3>() * ::capnp::POINTERS).clear();
+  return typename MAIGameState::OtherCars::Builder(_builder);
+}
+inline  ::MAIGameState::MessageType MAIGameState::Reader::getMessage() const {
+  return _reader.getDataField< ::MAIGameState::MessageType>(
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
+}
+
+inline  ::MAIGameState::MessageType MAIGameState::Builder::getMessage() {
+  return _builder.getDataField< ::MAIGameState::MessageType>(
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS);
+}
+inline void MAIGameState::Builder::setMessage( ::MAIGameState::MessageType value) {
+  _builder.setDataField< ::MAIGameState::MessageType>(
+      ::capnp::bounded<3>() * ::capnp::ELEMENTS, value);
+}
+
+inline bool MAIGameState::OtherCars::Reader::hasAllies() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS).isNull();
+}
+inline bool MAIGameState::OtherCars::Builder::hasAllies() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Reader MAIGameState::OtherCars::Reader::getAllies() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::get(_reader.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Builder MAIGameState::OtherCars::Builder::getAllies() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::get(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS));
+}
+inline void MAIGameState::OtherCars::Builder::setAllies( ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::set(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Builder MAIGameState::OtherCars::Builder::initAllies(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::init(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS), size);
+}
+inline void MAIGameState::OtherCars::Builder::adoptAllies(
+    ::capnp::Orphan< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::adopt(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>> MAIGameState::OtherCars::Builder::disownAllies() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::disown(_builder.getPointerField(
+      ::capnp::bounded<2>() * ::capnp::POINTERS));
+}
+
+inline bool MAIGameState::OtherCars::Reader::hasEnemies() const {
+  return !_reader.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS).isNull();
+}
+inline bool MAIGameState::OtherCars::Builder::hasEnemies() {
+  return !_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS).isNull();
+}
+inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Reader MAIGameState::OtherCars::Reader::getEnemies() const {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::get(_reader.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Builder MAIGameState::OtherCars::Builder::getEnemies() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::get(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
+}
+inline void MAIGameState::OtherCars::Builder::setEnemies( ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Reader value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::set(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), value);
+}
+inline  ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>::Builder MAIGameState::OtherCars::Builder::initEnemies(unsigned int size) {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::init(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), size);
+}
+inline void MAIGameState::OtherCars::Builder::adoptEnemies(
+    ::capnp::Orphan< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>&& value) {
+  ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::adopt(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS), kj::mv(value));
+}
+inline ::capnp::Orphan< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>> MAIGameState::OtherCars::Builder::disownEnemies() {
+  return ::capnp::_::PointerHelpers< ::capnp::List< ::MAIRLObjectState,  ::capnp::Kind::STRUCT>>::disown(_builder.getPointerField(
+      ::capnp::bounded<3>() * ::capnp::POINTERS));
 }
 
 inline float MAIControls::Reader::getThrottle() const {

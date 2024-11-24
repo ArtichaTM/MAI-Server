@@ -1,5 +1,8 @@
 #pragma once
 
+#include <queue>
+#include <mutex>
+
 //#include "GuiBase.h"
 #include "bakkesmod/plugin/bakkesmodplugin.h"
 #include "bakkesmod/plugin/pluginwindow.h"
@@ -10,7 +13,6 @@
 #include <kj/io.h>
 #include <kj/array.h>
 #include "capnpdata/data.hpp"
-
 
 #include "version.h"
 constexpr auto plugin_version = stringify(VERSION_MAJOR) "." stringify(VERSION_MINOR) "." stringify(VERSION_PATCH) "." stringify(VERSION_BUILD);
@@ -33,16 +35,20 @@ class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 	SOCKET client_socket = INVALID_SOCKET;
 	MAIControls::Reader latest_controls;
 	Vector ball_default_position;
+	std::vector<CarWrapper> allies;
+	std::vector<CarWrapper> enemies;
+
+	std::mutex messages_mutex;
+	std::queue<MAIGameState::MessageType> messages;
 
 	int initServer();
+	void performHooks();
 	void serveThread();
 
 	//Boilerplate
 	void onLoad() override;
 	void onUnload() override; // Uncomment and implement if you need a unload method
 	void Render(CanvasWrapper canvas);
-	void OnBallSpawned(void* params);
-	void RoundExit(void* params);
 
 	void fill(Vector, MAIVector::Builder);
 	void fill(Rotator, MAIRotator::Builder);
@@ -51,6 +57,7 @@ class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 
 	kj::Array<capnp::word> collectGameState();
 	void applyControls(MAIControls::Reader);
+	void RefreshTeamMembers();
 
 public:
 	//void RenderSettings() override; // Uncomment if you wanna render your own tab in the settings menu
