@@ -140,14 +140,14 @@ void MAIServer::performHooks()
 			this->RefreshTeamMembers();
 		}
 	);
-	gameWrapper->HookEventPost(
+	gameWrapper->HookEventWithCallerPost<ServerWrapper>(
 		"Function GameEvent_Soccar_TA.Countdown.BeginState",
-		[this](std::string eventname) {
+		[this](ServerWrapper caller, void* params, std::string eventname) {
 			gameWrapper->SetTimeout([this](GameWrapper* gw) {
-				this->RefreshTeamMembers();
-				this->ball_default_position = gameWrapper->GetCurrentGameState().GetBall().GetLocation();
+				this->ball_default_position = gw->GetCurrentGameState().GetBall().GetLocation();
 				this->ball_default_position.Z -= 40;
 			}, 1.f);
+			this->RefreshTeamMembers();
 			this->messages.push(MAIGameState::MessageType::KICKOFF_TIMER_STARTED);
 		}
 	);
@@ -268,11 +268,10 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 {
 	::capnp::MallocMessageBuilder message;
 	auto game_state = message.initRoot<MAIGameState>();
-	if (gameWrapper == nullptr) {
-		LOG("GameWrapper is null");
+	if (!gameWrapper) {
 		return capnp::messageToFlatArray(message);
 	}
-	game_state.setDead(true); // TODO
+	game_state.setDead(true);
 	data_collected.store(false);
 	gameWrapper->Execute([this, &game_state](GameWrapper* gw) {
 		if (!this->messages.empty()) {
@@ -301,9 +300,10 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 			// RL ball
 			BallWrapper ball = server.GetBall();
 			if (!ball) {
+				LOG("!ball");
 			} else if (ball.IsNull()) {
-			}
-			else {
+				LOG("ball.IsNull()");
+			} else {
 				fill(ball, game_state.initBall());
 			}
 		}
@@ -388,7 +388,9 @@ void MAIServer::RefreshTeamMembers()
 	CarWrapper local_car = gameWrapper->GetLocalCar();
 	if (!local_car) return;
 	ArrayWrapper<CarWrapper> cars = server.GetCars();
+	if (cars.IsNull()) return;
 	for (CarWrapper car : cars) {
+		if (!car) continue;
 		if (car.GetTeamNum2() == local_car.GetTeamNum2()) {
 			allies.push_back(car);
 		} else {
