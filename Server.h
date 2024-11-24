@@ -35,11 +35,10 @@ class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 	SOCKET client_socket = INVALID_SOCKET;
 	MAIControls::Reader latest_controls;
 	Vector ball_default_position;
+	std::queue<MAIGameState::MessageType> messages;
+
 	std::vector<CarWrapper> allies;
 	std::vector<CarWrapper> enemies;
-
-	std::mutex messages_mutex;
-	std::queue<MAIGameState::MessageType> messages;
 
 	int initServer();
 	void performHooks();
@@ -48,7 +47,7 @@ class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 	//Boilerplate
 	void onLoad() override;
 	void onUnload() override; // Uncomment and implement if you need a unload method
-	void Render(CanvasWrapper canvas);
+	void Render(CanvasWrapper) const;
 
 	void fill(Vector, MAIVector::Builder);
 	void fill(Rotator, MAIRotator::Builder);

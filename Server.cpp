@@ -125,23 +125,19 @@ void MAIServer::performHooks()
 		"Function TAGame.GameEvent_Soccar_TA.Destroyed",
 		[this](ServerWrapper caller, void* params, std::string eventname) {
 			ball_default_position = Vector();
-			//std::lock_guard<std::mutex> guard(messages_mutex);
-			//this->messages.push(MAIGameState::MessageType::GAME_EXIT);
+			this->messages.push(MAIGameState::MessageType::GAME_EXIT);
 		}
 	);
 	gameWrapper->HookEventWithCallerPost<BallWrapper>(
 		"Function TAGame.Ball_TA.Explode",
 		[this](BallWrapper caller, void* params, std::string eventname) {
-			//std::lock_guard<std::mutex> guard(messages_mutex);
-			//this->messages.push(MAIGameState::MessageType::BALL_EXPLODE);
+			this->messages.push(MAIGameState::MessageType::BALL_EXPLODE);
 		}
 	);
 	gameWrapper->HookEventPost(
 		"Function TAGame.StatusObserver_Products_TA.OnTeamChanged",
 		[this](std::string eventname) {
-			gameWrapper->SetTimeout([this](GameWrapper* gw) {
-				this->RefreshTeamMembers();
-			}, 0.5f);
+			this->RefreshTeamMembers();
 		}
 	);
 	gameWrapper->HookEventPost(
@@ -152,22 +148,19 @@ void MAIServer::performHooks()
 				this->ball_default_position = gameWrapper->GetCurrentGameState().GetBall().GetLocation();
 				this->ball_default_position.Z -= 40;
 			}, 1.f);
-			//std::lock_guard<std::mutex> guard(messages_mutex);
-			//this->messages.push(MAIGameState::MessageType::KICKOFF_TIMER_STARTED);
+			this->messages.push(MAIGameState::MessageType::KICKOFF_TIMER_STARTED);
 		}
 	);
 	gameWrapper->HookEventPost(
 		"Function GameEvent_Soccar_TA.Active.StartRound",
 		[this](std::string eventname) {
-			//std::lock_guard<std::mutex> guard(messages_mutex);
-			//this->messages.push(MAIGameState::MessageType::KICKOFF_TIMER_ENDED);
+			this->messages.push(MAIGameState::MessageType::KICKOFF_TIMER_ENDED);
 		}
 	);
 	gameWrapper->HookEventPost(
 		"Function GameEvent_Soccar_TA.ReplayPlayback.BeginState",
 		[this](std::string eventname) {
-			//std::lock_guard<std::mutex> guard(messages_mutex);
-			//this->messages.push(MAIGameState::MessageType::REPLAY_STARTED);
+			this->messages.push(MAIGameState::MessageType::REPLAY_STARTED);
 		}
 	);
 }
@@ -282,12 +275,10 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 	game_state.setDead(true); // TODO
 	data_collected.store(false);
 	gameWrapper->Execute([this, &game_state](GameWrapper* gw) {
-		//messages_mutex.lock();
 		if (!this->messages.empty()) {
 			game_state.setMessage(this->messages.front());
 			this->messages.pop();
 		}
-		//messages_mutex.unlock();
 
 		// RL car
 		CarWrapper car = gw->GetLocalCar();
@@ -361,7 +352,7 @@ void MAIServer::applyControls(MAIControls::Reader reader) {
 	}
 }
 
-void MAIServer::Render(CanvasWrapper canvas) {
+void MAIServer::Render(CanvasWrapper canvas) const {
 	// defines colors in RGBA 0-255
 	LinearColor colors;
 	colors.R = 255;
@@ -373,7 +364,7 @@ void MAIServer::Render(CanvasWrapper canvas) {
 	canvas.SetPosition(Vector2F{ 100.0f, 180.0f });
 	float y_offset = 0;
 
-	char buf[100];
+	/*char buf[100];
 	canvas.SetPosition(Vector2F{ 100.0f, 180.0f + y_offset });
 	snprintf(
 		buf,
@@ -384,7 +375,7 @@ void MAIServer::Render(CanvasWrapper canvas) {
 		ball_default_position.Z
 	);
 	canvas.DrawString(buf, 2.0f, 2.0f);
-	y_offset += RENDER_TEXT_OFFSET;
+	y_offset += RENDER_TEXT_OFFSET;*/
 }
 
 void MAIServer::RefreshTeamMembers()
