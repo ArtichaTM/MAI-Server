@@ -21,7 +21,7 @@ constexpr auto DEFAULT_PORT = 11545;
 constexpr auto MAICONTROLS_SIZE = 80;
 constexpr auto RECEIVE_TIMEOUT_SECONDS = std::chrono::seconds(3);
 constexpr float RENDER_TEXT_OFFSET = 30;
-const Vector ARENA_SIZE = Vector(4100, 6000, 2050);
+const Vector ARENA_SIZE = Vector(4096, 5120+880, 2044);
 constexpr auto TEAM_CARS_MAXIMUM = 4;
 
 class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
