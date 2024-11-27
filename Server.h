@@ -22,6 +22,7 @@ constexpr auto MAICONTROLS_SIZE = 80;
 constexpr auto RECEIVE_TIMEOUT_SECONDS = std::chrono::seconds(3);
 constexpr float RENDER_TEXT_OFFSET = 30;
 const Vector ARENA_SIZE = Vector(4100, 6000, 2050);
+constexpr auto TEAM_CARS_MAXIMUM = 4;
 
 class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 	//,public SettingsWindowBase // Uncomment if you wanna render your own tab in the settings menu
@@ -49,7 +50,7 @@ class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 	void onUnload() override; // Uncomment and implement if you need a unload method
 	void Render(CanvasWrapper) const;
 
-	void fill(Vector, MAIVector::Builder);
+	void fill(Vector, MAIVector::Builder, bool normalize = true);
 	void fill(Rotator, MAIRotator::Builder);
 	void fill(CarWrapper, MAIRLObjectState::Builder);
 	void fill(BallWrapper, MAIRLObjectState::Builder);

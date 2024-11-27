@@ -62,7 +62,7 @@ struct MAIRotator {
   class Pipeline;
 
   struct _capnpPrivate {
-    CAPNP_DECLARE_STRUCT_HEADER(fc29d01dbec2b0a9, 1, 0)
+    CAPNP_DECLARE_STRUCT_HEADER(fc29d01dbec2b0a9, 2, 0)
     #if !CAPNP_LITE
     static constexpr ::capnp::_::RawBrandedSchema const* brand() { return &schema->defaultBrand; }
     #endif  // !CAPNP_LITE
@@ -237,11 +237,11 @@ public:
   }
 #endif  // !CAPNP_LITE
 
-  inline  ::int8_t getPitch() const;
+  inline float getPitch() const;
 
-  inline  ::int8_t getRoll() const;
+  inline float getRoll() const;
 
-  inline  ::int8_t getYaw() const;
+  inline float getYaw() const;
 
 private:
   ::capnp::_::StructReader _reader;
@@ -271,14 +271,14 @@ public:
   inline ::kj::StringTree toString() const { return asReader().toString(); }
 #endif  // !CAPNP_LITE
 
-  inline  ::int8_t getPitch();
-  inline void setPitch( ::int8_t value);
+  inline float getPitch();
+  inline void setPitch(float value);
 
-  inline  ::int8_t getRoll();
-  inline void setRoll( ::int8_t value);
+  inline float getRoll();
+  inline void setRoll(float value);
 
-  inline  ::int8_t getYaw();
-  inline void setYaw( ::int8_t value);
+  inline float getYaw();
+  inline void setYaw(float value);
 
 private:
   ::capnp::_::StructBuilder _builder;
@@ -801,45 +801,45 @@ inline void MAIVector::Builder::setZ(float value) {
       ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
 }
 
-inline  ::int8_t MAIRotator::Reader::getPitch() const {
-  return _reader.getDataField< ::int8_t>(
+inline float MAIRotator::Reader::getPitch() const {
+  return _reader.getDataField<float>(
       ::capnp::bounded<0>() * ::capnp::ELEMENTS);
 }
 
-inline  ::int8_t MAIRotator::Builder::getPitch() {
-  return _builder.getDataField< ::int8_t>(
+inline float MAIRotator::Builder::getPitch() {
+  return _builder.getDataField<float>(
       ::capnp::bounded<0>() * ::capnp::ELEMENTS);
 }
-inline void MAIRotator::Builder::setPitch( ::int8_t value) {
-  _builder.setDataField< ::int8_t>(
+inline void MAIRotator::Builder::setPitch(float value) {
+  _builder.setDataField<float>(
       ::capnp::bounded<0>() * ::capnp::ELEMENTS, value);
 }
 
-inline  ::int8_t MAIRotator::Reader::getRoll() const {
-  return _reader.getDataField< ::int8_t>(
+inline float MAIRotator::Reader::getRoll() const {
+  return _reader.getDataField<float>(
       ::capnp::bounded<1>() * ::capnp::ELEMENTS);
 }
 
-inline  ::int8_t MAIRotator::Builder::getRoll() {
-  return _builder.getDataField< ::int8_t>(
+inline float MAIRotator::Builder::getRoll() {
+  return _builder.getDataField<float>(
       ::capnp::bounded<1>() * ::capnp::ELEMENTS);
 }
-inline void MAIRotator::Builder::setRoll( ::int8_t value) {
-  _builder.setDataField< ::int8_t>(
+inline void MAIRotator::Builder::setRoll(float value) {
+  _builder.setDataField<float>(
       ::capnp::bounded<1>() * ::capnp::ELEMENTS, value);
 }
 
-inline  ::int8_t MAIRotator::Reader::getYaw() const {
-  return _reader.getDataField< ::int8_t>(
+inline float MAIRotator::Reader::getYaw() const {
+  return _reader.getDataField<float>(
       ::capnp::bounded<2>() * ::capnp::ELEMENTS);
 }
 
-inline  ::int8_t MAIRotator::Builder::getYaw() {
-  return _builder.getDataField< ::int8_t>(
+inline float MAIRotator::Builder::getYaw() {
+  return _builder.getDataField<float>(
       ::capnp::bounded<2>() * ::capnp::ELEMENTS);
 }
-inline void MAIRotator::Builder::setYaw( ::int8_t value) {
-  _builder.setDataField< ::int8_t>(
+inline void MAIRotator::Builder::setYaw(float value) {
+  _builder.setDataField<float>(
       ::capnp::bounded<2>() * ::capnp::ELEMENTS, value);
 }
 

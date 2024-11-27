@@ -15,8 +15,8 @@ std::shared_ptr<CVarManagerWrapper> _globalCvarManager;
 void MAIServer::onLoad()
 {
 	_globalCvarManager = cvarManager;
-	allies .reserve(4);
-	enemies.reserve(4);
+	allies .reserve(TEAM_CARS_MAXIMUM-1);
+	enemies.reserve(TEAM_CARS_MAXIMUM);
 
 	initServer();
 	server_thread = new std::thread([this] { serveThread(); });
@@ -233,26 +233,32 @@ void MAIServer::serveThread()
 	}
 }
 
-void MAIServer::fill(Vector bm_vector, MAIVector::Builder builder)
+void MAIServer::fill(Vector bm_vector, MAIVector::Builder builder, bool normalize)
 {
-	builder.setX((bm_vector.X - ball_default_position.X)/ARENA_SIZE.X);
-	builder.setY((bm_vector.Y - ball_default_position.Y)/ARENA_SIZE.Y);
-	builder.setZ((bm_vector.Z - ball_default_position.Z)/ARENA_SIZE.Z);
+	if (normalize) {
+		builder.setX((bm_vector.X - ball_default_position.X) / ARENA_SIZE.X);
+		builder.setY((bm_vector.Y - ball_default_position.Y) / ARENA_SIZE.Y);
+		builder.setZ((bm_vector.Z - ball_default_position.Z) / ARENA_SIZE.Z);
+	} else {
+		builder.setX(bm_vector.X/5.5);
+		builder.setY(bm_vector.Y/5.5);
+		builder.setZ(bm_vector.Z/5.5);
+	}
 }
 
 void MAIServer::fill(Rotator rotator, MAIRotator::Builder builder)
 {
-	builder.setPitch(rotator.Pitch);
-	builder.setRoll(rotator.Roll);
-	builder.setYaw(rotator.Yaw);
+	builder.setPitch(rotator.Pitch / static_cast<float>(16364));
+	builder.setRoll(rotator.Roll / static_cast<float>(32768));
+	builder.setYaw(rotator.Yaw / static_cast<float>(32768));
 }
 
 void MAIServer::fill(CarWrapper car, MAIRLObjectState::Builder builder)
 {
 	fill(car.GetLocation(), builder.initPosition());
 	fill(car.GetRotation(), builder.initRotation());
-	fill(car.GetAngularVelocity(), builder.initAngularVelocity());
 	fill(car.GetVelocity(), builder.initVelocity());
+	fill(car.GetAngularVelocity(), builder.initAngularVelocity(), false);
 }
 
 void MAIServer::fill(BallWrapper ball, MAIRLObjectState::Builder builder)
@@ -392,6 +398,7 @@ void MAIServer::RefreshTeamMembers()
 	for (CarWrapper car : cars) {
 		if (!car) continue;
 		if (car.GetTeamNum2() == local_car.GetTeamNum2()) {
+			if (car.memory_address == local_car.memory_address) continue;
 			allies.push_back(car);
 		} else {
 			enemies.push_back(car);
