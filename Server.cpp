@@ -299,16 +299,12 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 		// RL server
 		ServerWrapper server = gw->GetCurrentGameState();
 		if (!server) {
-			LOG("!server");
 		} else if (server.IsNull()) {
-			LOG("server.IsNull()");
 		} else {
 			// RL ball
 			BallWrapper ball = server.GetBall();
 			if (!ball) {
-				LOG("!ball");
 			} else if (ball.IsNull()) {
-				LOG("ball.IsNull()");
 			} else {
 				fill(ball, game_state.initBall());
 			}
@@ -351,9 +347,12 @@ void MAIServer::applyControls(MAIControls::Reader reader) {
 	latest_controls = reader;
 	if (latest_controls.getReset() && gameWrapper != nullptr) {
 		gameWrapper->Execute([](GameWrapper* gw) {
-			ServerWrapper sw = gw->GetCurrentGameState();
+			ServerWrapper sw = gw->GetGameEventAsServer();
 			if (!sw) return;
-			sw.PlayerResetTraining();
+			GameEditorWrapper training = GameEditorWrapper(sw.memory_address);
+			//training.CommitRedoRound();
+			//training.ResetRound();
+			//training.ResetRound();
 		});
 	}
 }
