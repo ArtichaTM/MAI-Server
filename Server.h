@@ -22,6 +22,7 @@ constexpr auto MAICONTROLS_SIZE = 80;
 constexpr auto RECEIVE_TIMEOUT_SECONDS = std::chrono::seconds(3);
 constexpr float RENDER_TEXT_OFFSET = 30;
 const Vector ARENA_SIZE = Vector(4096, 5120+880, 2044);
+const float ROTATION_DIVIDER = 5.5f;
 constexpr auto TEAM_CARS_MAXIMUM = 4;
 
 class MAIServer : public BakkesMod::Plugin::BakkesModPlugin

@@ -240,9 +240,9 @@ void MAIServer::fill(Vector bm_vector, MAIVector::Builder builder, bool normaliz
 		builder.setY((bm_vector.Y - ball_default_position.Y) / ARENA_SIZE.Y);
 		builder.setZ((bm_vector.Z - ball_default_position.Z) / ARENA_SIZE.Z);
 	} else {
-		builder.setX(bm_vector.X/5.5);
-		builder.setY(bm_vector.Y/5.5);
-		builder.setZ(bm_vector.Z/5.5);
+		builder.setX(bm_vector.X/ROTATION_DIVIDER);
+		builder.setY(bm_vector.Y/ROTATION_DIVIDER);
+		builder.setZ(bm_vector.Z/ROTATION_DIVIDER);
 	}
 }
 
@@ -350,9 +350,6 @@ void MAIServer::applyControls(MAIControls::Reader reader) {
 			ServerWrapper sw = gw->GetGameEventAsServer();
 			if (!sw) return;
 			GameEditorWrapper training = GameEditorWrapper(sw.memory_address);
-			//training.CommitRedoRound();
-			//training.ResetRound();
-			//training.ResetRound();
 		});
 	}
 }
