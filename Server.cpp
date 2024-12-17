@@ -163,6 +163,16 @@ void MAIServer::performHooks()
 			this->messages.push(MAIGameState::MessageType::REPLAY_STARTED);
 		}
 	);
+	gameWrapper->HookEventWithCallerPost<BallWrapper>(
+		"Function TAGame.Ball_TA.OnCarTouch",
+		[this](BallWrapper caller, void* params, std::string eventname) {
+			// Skips adding ball touch if another event already in there
+			// This line added bcz there's a more important messages than ball touch,
+			// so during dribling or similiar context we can skip ball touches
+			if (!messages.empty()) return;
+			this->messages.push(MAIGameState::MessageType::BALL_TOUCHED);
+		}
+	);
 }
 
 void MAIServer::serveThread()
@@ -248,9 +258,9 @@ void MAIServer::fill(Vector bm_vector, MAIVector::Builder builder, bool normaliz
 
 void MAIServer::fill(Rotator rotator, MAIRotator::Builder builder)
 {
-	builder.setPitch(rotator.Pitch / static_cast<float>(16364));
-	builder.setRoll(rotator.Roll / static_cast<float>(32768));
-	builder.setYaw(rotator.Yaw / static_cast<float>(32768));
+	builder.setPitch(rotator.Pitch / 16364.0f);
+	builder.setRoll(rotator.Roll / 32768.0f);
+	builder.setYaw(rotator.Yaw / 32768.0f);
 }
 
 void MAIServer::fill(CarWrapper car, MAIRLObjectState::Builder builder)
@@ -311,21 +321,22 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 		}
 
 		// Other cars
-		bool allies_exists = !this->allies.empty();
-		bool enemies_exists = !this->enemies.empty();
-		if (allies_exists or enemies_exists) {
+		size_t allies_size = this->allies.size();
+		size_t enemies_size = this->enemies.size();
+
+		if ((allies_size > 0) || (enemies_size > 0)) {
 			MAIGameState::OtherCars::Builder other_cars = game_state.initOtherCars();
-			if (allies_exists) {
-				auto mai_allies = other_cars.initAllies(this->allies.size());
-				for (int i = 0; i < this->allies.size(); i++) {
+			if (allies_size > 0) {
+				auto mai_allies = other_cars.initAllies(allies_size);
+				for (int i = 0; i < allies_size; i++) {
 					CarWrapper car = this->allies[i];
 					if (car.IsNull()) continue;
 					fill(car, mai_allies[i]);
 				}
 			}
-			if (enemies_exists) {
-				auto mai_enemies = other_cars.initEnemies(this->enemies.size());
-				for (int i = 0; i < this->enemies.size(); i++) {
+			if (enemies_size > 0) {
+				auto mai_enemies = other_cars.initEnemies(enemies_size);
+				for (int i = 0; i < enemies_size; i++) {
 					CarWrapper car = this->enemies[i];
 					if (car.IsNull()) continue;
 					fill(car, mai_enemies[i]);
@@ -336,32 +347,18 @@ kj::Array<capnp::word> MAIServer::collectGameState()
 		data_collected.store(true);
 	});
 
-	while (!data_collected.load()) {
-		continue;
-	}
+	while (!data_collected.load()) { continue; }
 
 	return capnp::messageToFlatArray(message);
 }
 
 void MAIServer::applyControls(MAIControls::Reader reader) {
 	latest_controls = reader;
-	if (latest_controls.getReset() && gameWrapper != nullptr) {
-		gameWrapper->Execute([](GameWrapper* gw) {
-			ServerWrapper sw = gw->GetGameEventAsServer();
-			if (!sw) return;
-			GameEditorWrapper training = GameEditorWrapper(sw.memory_address);
-		});
-	}
 }
 
 void MAIServer::Render(CanvasWrapper canvas) const {
 	// defines colors in RGBA 0-255
-	LinearColor colors;
-	colors.R = 255;
-	colors.G = 255;
-	colors.B = 255;
-	colors.A = 120;
-	canvas.SetColor(colors);
+	canvas.SetColor(LinearColor{ 255 ,255, 255, 120 });
 
 	canvas.SetPosition(Vector2F{ 100.0f, 180.0f });
 	float y_offset = 0;
