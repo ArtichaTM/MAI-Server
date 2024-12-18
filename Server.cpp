@@ -124,7 +124,7 @@ void MAIServer::performHooks()
 	gameWrapper->HookEventWithCallerPost<ServerWrapper>(
 		"Function TAGame.GameEvent_Soccar_TA.Destroyed",
 		[this](ServerWrapper caller, void* params, std::string eventname) {
-			ball_default_position = Vector();
+			//ball_default_position = Vector();
 			this->messages.push(MAIGameState::MessageType::GAME_EXIT);
 		}
 	);
@@ -143,10 +143,10 @@ void MAIServer::performHooks()
 	gameWrapper->HookEventWithCallerPost<ServerWrapper>(
 		"Function GameEvent_Soccar_TA.Countdown.BeginState",
 		[this](ServerWrapper caller, void* params, std::string eventname) {
-			gameWrapper->SetTimeout([this](GameWrapper* gw) {
+			/*gameWrapper->SetTimeout([this](GameWrapper* gw) {
 				this->ball_default_position = gw->GetCurrentGameState().GetBall().GetLocation();
 				this->ball_default_position.Z -= 40;
-			}, 1.f);
+			}, 1.f);*/
 			this->RefreshTeamMembers();
 			this->messages.push(MAIGameState::MessageType::KICKOFF_TIMER_STARTED);
 		}
@@ -246,9 +246,9 @@ void MAIServer::serveThread()
 void MAIServer::fill(Vector bm_vector, MAIVector::Builder builder, bool normalize)
 {
 	if (normalize) {
-		builder.setX((bm_vector.X - ball_default_position.X) / ARENA_SIZE.X);
-		builder.setY((bm_vector.Y - ball_default_position.Y) / ARENA_SIZE.Y);
-		builder.setZ((bm_vector.Z - ball_default_position.Z) / ARENA_SIZE.Z);
+		builder.setX((bm_vector.X - map_center.X) / ARENA_SIZE.X);
+		builder.setY((bm_vector.Y - map_center.Y) / ARENA_SIZE.Y);
+		builder.setZ((bm_vector.Z - map_center.Z) / ARENA_SIZE.Z);
 	} else {
 		builder.setX(bm_vector.X/ROTATION_DIVIDER);
 		builder.setY(bm_vector.Y/ROTATION_DIVIDER);

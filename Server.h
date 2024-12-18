@@ -36,7 +36,7 @@ class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 	SOCKET server_socket = INVALID_SOCKET;
 	SOCKET client_socket = INVALID_SOCKET;
 	MAIControls::Reader latest_controls;
-	Vector ball_default_position;
+	Vector map_center = Vector(0, 0, 0);
 	std::queue<MAIGameState::MessageType> messages;
 
 	std::vector<CarWrapper> allies;
