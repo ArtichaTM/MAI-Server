@@ -38,6 +38,7 @@ class MAIServer : public BakkesMod::Plugin::BakkesModPlugin
 	MAIControls::Reader latest_controls;
 	Vector map_center = Vector(0, 0, 0);
 	std::queue<MAIGameState::MessageType> messages;
+	bool jump_switch = false;
 
 	std::vector<CarWrapper> allies;
 	std::vector<CarWrapper> enemies;

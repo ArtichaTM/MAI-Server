@@ -116,10 +116,10 @@ void MAIServer::performHooks()
 			}
 			input->HoldingBoost = latest_controls.getBoost();
 
-			if (!input->Jump) {
-				input->Jump = latest_controls.getJump();
+			if (latest_controls.getJump()) {
+				input->Jump = jump_switch;
+				jump_switch = !jump_switch;
 			}
-			input->Jumped = latest_controls.getJump();
 		});
 	gameWrapper->HookEventWithCallerPost<ServerWrapper>(
 		"Function TAGame.GameEvent_Soccar_TA.Destroyed",
